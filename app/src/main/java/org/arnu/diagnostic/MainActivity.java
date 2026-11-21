@@ -1,11 +1,15 @@
 package org.arnu.diagnostic;
 import android.app.*;
 import android.content.*;
-import android.media.session.*;
+import android.media.session.MediaController;
+import android.media.session.MediaSessionManager;
+import android.media.session.PlaybackState;
 import android.os.*;
 import android.provider.Settings;
 import android.view.*;
-import android.widget.*;
+import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import java.util.Locale;
 
 public final class MainActivity extends Activity {
