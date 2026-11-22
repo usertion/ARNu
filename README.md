@@ -42,6 +42,25 @@ ARNu retrocede automáticamente unos segundos al reanudar un vídeo en **Nuvio**
 - ARNu no garantiza que Android nunca cierre su proceso. La optimización de batería del fabricante puede afectar al funcionamiento.
 - **Versión beta:** probada inicialmente en un Tanix TX5 con Android 14. No se ha validado todavía en todos los dispositivos.
 
+### Android 13/14: «Ajuste restringido» y permiso de acceso multimedia
+
+En algunos dispositivos con Android 13 o 14, las aplicaciones instaladas mediante APK pueden mostrar **«Ajuste restringido»** al intentar habilitar el acceso a notificaciones. El permiso es necesario para que ARNu pueda detectar la pausa y controlar la sesión multimedia de Nuvio. No es lo mismo que el interruptor ordinario de **«Notificaciones»** de la ficha de la aplicación: ese controla las notificaciones que ARNu puede mostrar, no el acceso a sesiones multimedia.
+
+**Primero prueba sin ADB:** abre la ficha de ARNu en Ajustes → Aplicaciones y, si existe el menú de tres puntos, elige **«Permitir ajustes restringidos»**. Después vuelve a ARNu → **Configurar acceso multimedia** y autoriza el acceso.
+
+**Si esa opción no existe**, en un dispositivo propio y de confianza se puede probar mediante ADB (requiere depuración habilitada y conexión ADB desde un ordenador o una herramienta como ATVTools):
+
+```sh
+adb shell appops set org.arnu.diagnostic ACCESS_RESTRICTED_SETTINGS allow
+adb shell appops get org.arnu.diagnostic ACCESS_RESTRICTED_SETTINGS
+```
+
+El segundo comando debería indicar `ACCESS_RESTRICTED_SETTINGS: allow`. Si ya estás dentro de una consola `adb shell` (por ejemplo, en ATVTools), **omite** el prefijo `adb shell` y ejecuta directamente `appops set ...` y `appops get ...`.
+
+**Importante:** este comando **no concede por sí mismo** el acceso a notificaciones. Después abre ARNu, pulsa **Configurar acceso multimedia**, activa manualmente el permiso de ARNu en Android y vuelve a la app para encender **Retroceso automático**. Verifica que la cabecera indique **Activado**. «Iniciar con Android TV» por sí solo no activa el retroceso.
+
+El procedimiento ADB se ha probado en **Tanix TX5 con Android 14**; no se garantiza en otros firmwares. Puede devolver errores o estar bloqueado por el fabricante. **No hace falta root**. Utiliza ADB solo en dispositivos que administras y comprende que estás levantando una protección de Android para esta aplicación concreta. ARNu no puede concederse automáticamente ese permiso.
+
 ### Privacidad
 
 ARNu no requiere permiso de Internet, acceso a archivos ni permisos de root. Utiliza el acceso a notificaciones de Android para obtener las **sesiones multimedia activas**, detectar el estado de reproducción de Nuvio y solicitar el retroceso. El código no procesa el contenido de las notificaciones ni incorpora analítica o publicidad.
@@ -64,6 +83,25 @@ ARNu is an independent Android TV companion app for Nuvio. It rewinds playback w
 
 **Compatibility:** Android 8.0+; designed for Android TV and Nuvio. Functionality depends on device firmware, media-session support and battery-management behavior. This is beta software.
 
+### Android 13/14: restricted settings
+
+On some Android 13/14 devices, a sideloaded APK cannot enable notification listener access and Android shows **“Restricted setting”**. This is different from the ordinary **Notifications** toggle in the app's system settings, which controls notifications displayed by the app.
+
+First, check ARNu's system app-info page for a three-dot menu → **Allow restricted settings**. If present, enable it, then return to ARNu → **Configure media access** and manually enable notification access.
+
+If the option is missing, advanced users may try ADB on a device they own:
+
+```sh
+adb shell appops set org.arnu.diagnostic ACCESS_RESTRICTED_SETTINGS allow
+adb shell appops get org.arnu.diagnostic ACCESS_RESTRICTED_SETTINGS
+```
+
+If already inside `adb shell`, omit the `adb shell` prefix. The expected check result is `ACCESS_RESTRICTED_SETTINGS: allow`.
+
+**ADB does not grant notification listener access automatically.** Open ARNu → **Configure media access**, manually authorize ARNu in Android settings, then enable **Automatic rewind** in ARNu and confirm its status is **Enabled**. Start on boot alone does not enable rewind.
+
+This workaround was tested on a **Tanix TX5 running Android 14**. Other devices may behave differently or reject the command. No root is required. ADB lifts a security restriction for ARNu; use it only on trusted devices and applications.
+
 **Privacy:** no Internet, storage or root permission; no telemetry or advertising. See the source code for details.
 
 **Troubleshooting:** `adb logcat -s ARNu`. A pause shorter than the configured threshold does not trigger rewind.
@@ -78,9 +116,9 @@ gradle --no-daemon assembleDebug
 
 Output: `app/build/outputs/apk/debug/app-debug.apk`.
 
-The [GitHub Actions workflow](.github/workflows/build-apk.yml) builds a **debug** APK and uploads it as a temporary ZIP artifact. **Do not treat this as a stable public update channel:** debug signatures may change between builds.
+The [GitHub Actions workflow](.github/workflows/build-apk.yml) builds a **debug** APK and, when release signing secrets are configured, a **signed release** APK; both are uploaded as ZIP artifacts. **Do not treat this as a stable public update channel:** debug signatures may change between builds.
 
-For public releases, create and securely retain a **permanent release signing key**, build a signed APK, and attach the APK directly to a GitHub Release. Never commit the private signing key or its passwords to the repository.
+For public releases, securely retain the **permanent release signing key**, and attach the signed APK directly to a GitHub Release. Never commit the private signing key or its passwords to the repository.
 
 ## License
 
