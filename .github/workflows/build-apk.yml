@@ -65,8 +65,9 @@ jobs:
           ARNU_KEY_PASSWORD: ${{ secrets.ARNU_KEY_PASSWORD }}
           ARNU_KEY_ALIAS: ${{ secrets.ARNU_KEY_ALIAS }}
         run: |
-          gradle --no-daemon assembleRelease
+          gradle --no-daemon assembleRelease bundleRelease
           "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose app/build/outputs/apk/release/app-release.apk
+          test -s app/build/outputs/bundle/release/app-release.aab
 
       - name: Upload signed release APK
         if: steps.signing.outputs.ready == 'true'
@@ -74,4 +75,12 @@ jobs:
         with:
           name: ARNu-0.6-signed-release
           path: app/build/outputs/apk/release/app-release.apk
+          if-no-files-found: error
+
+      - name: Upload signed release AAB for Google Play
+        if: steps.signing.outputs.ready == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ARNu-0.6-signed-play-bundle
+          path: app/build/outputs/bundle/release/app-release.aab
           if-no-files-found: error
