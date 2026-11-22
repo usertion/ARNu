@@ -14,9 +14,9 @@ public final class SessionListener extends NotificationListenerService {
  private long paused=-1;
  private long pauseStarted=-1;
  private boolean connected;
- private final SharedPreferences.OnSharedPreferenceChangeListener prefs=(p,k)->{if("enabled".equals(k)||"autostart".equals(k)||"opened_boot".equals(k)){paused=-1;refresh();h.removeCallbacks(tick);if(connected&&enabled())h.postDelayed(tick,2000);}};
  private final MediaSessionManager.OnActiveSessionsChangedListener sessions=list->refresh();
  private final Runnable tick=new Runnable(){public void run(){if(connected&&enabled()){refresh();h.postDelayed(this,2000);}}};
+ private final SharedPreferences.OnSharedPreferenceChangeListener prefs=(p,k)->{if("enabled".equals(k)||"autostart".equals(k)||"opened_boot".equals(k)){paused=-1;refresh();h.removeCallbacks(tick);if(connected&&enabled())h.postDelayed(tick,2000);}};
  private boolean enabled(){SharedPreferences p=getSharedPreferences("arnu",0);return p.getBoolean("enabled",false)&&(p.getBoolean("autostart",true)||MainActivity.openedThisBoot(this));}
  @Override public void onListenerConnected(){
  super.onListenerConnected(); connected=true;
