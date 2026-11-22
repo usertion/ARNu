@@ -1,6 +1,40 @@
 plugins { id 'com.android.application' }
+
+def releaseKeystorePath = System.getenv('ARNU_KEYSTORE_PATH')
+def releaseKeystorePassword = System.getenv('ARNU_KEYSTORE_PASSWORD')
+def releaseKeyPassword = System.getenv('ARNU_KEY_PASSWORD')
+def releaseKeyAlias = System.getenv('ARNU_KEY_ALIAS')
+
 android {
- namespace 'org.arnu.diagnostic'
- compileSdk 35
- defaultConfig { applicationId 'org.arnu.diagnostic'; minSdk 26; targetSdk 35; versionCode 6; versionName '0.6' }
+    namespace 'org.arnu.diagnostic'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId 'org.arnu.diagnostic'
+        minSdk 26
+        targetSdk 35
+        versionCode 6
+        versionName '0.6'
+    }
+
+    signingConfigs {
+        release {
+            if (releaseKeystorePath && releaseKeystorePassword && releaseKeyPassword && releaseKeyAlias) {
+                storeFile file(releaseKeystorePath)
+                storePassword releaseKeystorePassword
+                keyAlias releaseKeyAlias
+                keyPassword releaseKeyPassword
+                storeType 'pkcs12'
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            // A release build is only configured as signed when all four
+            // signing environment variables have been supplied.
+            signingConfig signingConfigs.release
+            minifyEnabled false
+        }
+    }
 }
