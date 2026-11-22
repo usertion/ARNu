@@ -14,13 +14,17 @@ public final class MainActivity extends Activity {
  super.onCreate(b);
  getSharedPreferences("arnu",0).edit().putInt("opened_boot",Settings.Global.getInt(getContentResolver(),"boot_count",-1)).apply();
  LinearLayout root=new LinearLayout(this);root.setOrientation(1);root.setPadding(48,32,48,32);root.setGravity(Gravity.CENTER_VERTICAL);
- TextView title=new TextView(this);title.setText("ARNu 0.3");title.setTextSize(28);root.addView(title);
+ TextView title=new TextView(this);title.setText("ARNu 0.4");title.setTextSize(28);root.addView(title);
  Button grant=new Button(this);grant.setText(t("Grant media access","Conceder acceso multimedia"));grant.setOnClickListener(v->{try{startActivity(new Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS));}catch(Exception e){Toast.makeText(this,e.toString(),Toast.LENGTH_LONG).show();}});root.addView(grant);
  Switch toggle=new Switch(this);toggle.setText(t("Automatic rewind","Retroceso automático"));toggle.setTextSize(20);toggle.setChecked(getSharedPreferences("arnu",0).getBoolean("enabled",false));toggle.setOnCheckedChangeListener((v,on)->getSharedPreferences("arnu",0).edit().putBoolean("enabled",on).apply());root.addView(toggle);
  Switch boot=new Switch(this);boot.setText(t("Start with Android TV","Iniciar con Android TV"));boot.setTextSize(20);boot.setChecked(getSharedPreferences("arnu",0).getBoolean("autostart",true));boot.setOnCheckedChangeListener((v,on)->getSharedPreferences("arnu",0).edit().putBoolean("autostart",on).apply());root.addView(boot);
  TextView duration=new TextView(this);duration.setTextSize(20);root.addView(duration);
  SeekBar bar=new SeekBar(this);bar.setMax(29);bar.setProgress(getSharedPreferences("arnu",0).getInt("seconds",7)-1);duration.setText(t("Rewind: ","Retroceso: ")+(bar.getProgress()+1)+" s");bar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener(){public void onProgressChanged(SeekBar b,int n,boolean user){duration.setText(t("Rewind: ","Retroceso: ")+(n+1)+" s");getSharedPreferences("arnu",0).edit().putInt("seconds",n+1).apply();}public void onStartTrackingTouch(SeekBar b){}public void onStopTrackingTouch(SeekBar b){}});root.addView(bar);
+ TextView minimum=new TextView(this);minimum.setTextSize(20);root.addView(minimum);
+ SeekBar pauseBar=new SeekBar(this);pauseBar.setMax(120);pauseBar.setProgress(getSharedPreferences("arnu",0).getInt("min_pause",0));
+ minimum.setText(t("Minimum pause: ","Pausa mínima: ")+pauseBar.getProgress()+" s");
+ pauseBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener(){public void onProgressChanged(SeekBar b,int n,boolean user){minimum.setText(t("Minimum pause: ","Pausa mínima: ")+n+" s"+(n==0?t(" (always)"," (siempre)"):""));getSharedPreferences("arnu",0).edit().putInt("min_pause",n).apply();}public void onStartTrackingTouch(SeekBar b){}public void onStopTrackingTouch(SeekBar b){}});root.addView(pauseBar);
  TextView info=new TextView(this);info.setText(t("Grant access, enable rewind, then return to Nuvio. Play, pause and resume without leaving Nuvio. Diagnostics: adb logcat -s ARNu","Concede acceso, activa el retroceso y vuelve a Nuvio. Reproduce, pausa y reanuda sin salir de Nuvio. Diagnóstico: adb logcat -s ARNu"));info.setTextSize(18);root.addView(info);
- setContentView(root);grant.requestFocus();
+ ScrollView scroll=new ScrollView(this);scroll.addView(root);setContentView(scroll);grant.requestFocus();
  }
 }
