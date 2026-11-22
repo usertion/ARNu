@@ -1,5 +1,13 @@
 # ARNu — Auto Rewind Nuvio
 
+<div align="center">
+
+<img src="ARNu.png" alt="ARNu 0.6 — pantalla principal en Android TV" width="900">
+
+**ARNu 0.6 · Auto Rewind Nuvio**
+
+</div>
+
 **ARNu** is a lightweight, independent companion app for **Nuvio on Android TV**. It automatically rewinds playback when you resume after a pause, so you don't miss the dialogue or action.
 
 **Current version:** 0.6 — beta / testing.
