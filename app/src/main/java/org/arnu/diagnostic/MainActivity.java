@@ -44,7 +44,7 @@ public final class MainActivity extends Activity {
  @Override public void onCreate(Bundle b){
  super.onCreate(b);p=getSharedPreferences("arnu",0);p.edit().putInt("opened_boot",Settings.Global.getInt(getContentResolver(),"boot_count",-1)).apply();
  ScrollView scroll=new ScrollView(this);scroll.setFillViewport(true);scroll.setBackgroundColor(BG);LinearLayout root=vertical();root.setPadding(dp(28),dp(18),dp(28),dp(18));scroll.addView(root);setContentView(scroll);
- LinearLayout header=horizontal();ImageView logo=new ImageView(this);logo.setImageResource(R.drawable.arnu_icon);header.addView(logo,new LinearLayout.LayoutParams(dp(64),dp(64)));LinearLayout branding=vertical();branding.setPadding(dp(12),0,0,0);branding.addView(label("ARNu",32,INK,true));branding.addView(label("Auto Rewind Nuvio",15,MUTED,false));fill(header,branding);header.addView(label("v0.5",13,MUTED,false));root.addView(header);gap(root,6);status=label("",15,ACCENT,true);root.addView(status);gap(root,14);
+ LinearLayout header=horizontal();ImageView logo=new ImageView(this);logo.setImageResource(R.drawable.arnu_icon);header.addView(logo,new LinearLayout.LayoutParams(dp(64),dp(64)));LinearLayout branding=vertical();branding.setPadding(dp(12),0,0,0);branding.addView(label("ARNu",32,INK,true));branding.addView(label("Auto Rewind Nuvio",15,MUTED,false));fill(header,branding);header.addView(label("v0.6",13,MUTED,false));root.addView(header);gap(root,6);status=label("",15,ACCENT,true);root.addView(status);gap(root,14);
  boolean wide=getResources().getConfiguration().screenWidthDp>=650;LinearLayout columns=wide?horizontal():vertical();columns.setGravity(Gravity.TOP);root.addView(columns);
  LinearLayout left=vertical(),right=vertical();if(wide){fill(columns,left);Space sp=new Space(this);columns.addView(sp,new LinearLayout.LayoutParams(dp(20),1));fill(columns,right);}else{columns.addView(left);columns.addView(right);}
  left.addView(label(t("GENERAL","GENERAL"),13,MUTED,true));gap(left,8);
@@ -54,8 +54,18 @@ public final class MainActivity extends Activity {
  right.addView(label(t("PLAYBACK","REPRODUCCIÓN"),13,MUTED,true));gap(right,8);
  counter(right,t("Rewind time","Tiempo de retroceso"),t("Seconds to go back","Segundos que se rebobinan"),"seconds",1,30,7);
  counter(right,t("Minimum pause","Pausa mínima"),t("Ignore shorter interruptions","Ignora las interrupciones breves"),"min_pause",0,120,0);
- summary=label("",14,MUTED,false);root.addView(summary);refresh();
+ summary=label("",14,MUTED,false);root.addView(summary);gap(root,14);
+ LinearLayout actions=wide?horizontal():vertical();root.addView(actions);
+ Button nuvio=button(t("▶  Go to Nuvio","▶  Ir a Nuvio"));nuvio.setTextColor(ACCENT);
+ Button home=button(t("Exit to home","Salir al inicio")),stop=button(t("Stop ARNu","Detener ARNu"));stop.setTextColor(0xffffb3b3);
+ if(wide){fill(actions,nuvio);Space a=new Space(this);actions.addView(a,new LinearLayout.LayoutParams(dp(8),1));fill(actions,home);Space z=new Space(this);actions.addView(z,new LinearLayout.LayoutParams(dp(8),1));fill(actions,stop);}else{actions.addView(nuvio);gap(actions,6);actions.addView(home);gap(actions,6);actions.addView(stop);}
+ nuvio.setOnClickListener(v->{Intent i=getPackageManager().getLeanbackLaunchIntentForPackage("com.nuvio.tv");if(i==null)i=getPackageManager().getLaunchIntentForPackage("com.nuvio.tv");if(i==null){Toast.makeText(this,t("Nuvio unavailable","Nuvio no disponible"),Toast.LENGTH_SHORT).show();return;}try{startActivity(i);finishAndRemoveTask();}catch(Exception e){Toast.makeText(this,e.toString(),Toast.LENGTH_SHORT).show();}});
+ home.setOnClickListener(v->goHome());
+ stop.setOnClickListener(v->new android.app.AlertDialog.Builder(this).setTitle(t("Stop ARNu?","¿Detener ARNu?")).setMessage(t("Automatic rewind will stay disabled until you enable it again.","El retroceso quedará desactivado hasta que vuelvas a activarlo.")).setNegativeButton(t("Cancel","Cancelar"),null).setPositiveButton(t("Stop","Detener"),(d,w)->{p.edit().putBoolean("enabled",false).apply();goHome();}).show());
+ refresh();
  }
+ private void goHome(){Intent i=new Intent(Intent.ACTION_MAIN);i.addCategory(Intent.CATEGORY_HOME);i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);try{startActivity(i);}finally{finishAndRemoveTask();}}
+ @Override public void onBackPressed(){finishAndRemoveTask();}
  @Override protected void onResume(){super.onResume();refresh();}
  private void refresh(){if(status==null||p==null)return;NotificationManager nm=(NotificationManager)getSystemService(NOTIFICATION_SERVICE);boolean access=nm.isNotificationListenerAccessGranted(new ComponentName(this,SessionListener.class));status.setText(!access?t("● Media access required","● Falta acceso multimedia"):p.getBoolean("enabled",false)?t("● Enabled · Media access granted","● Activado · Acceso concedido"):t("● Disabled","● Desactivado"));if(summary!=null){int n=p.getInt("min_pause",0),s=p.getInt("seconds",7);summary.setText(n==0?t("Rewind "+s+" s after every pause.","Retrocede "+s+" s después de cualquier pausa."):t("Rewind "+s+" s after a pause of at least "+n+" s.","Retrocede "+s+" s tras una pausa de al menos "+n+" s."));}}
 }
