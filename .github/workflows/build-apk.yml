@@ -1,8 +1,9 @@
-name: Build ARNu Diagnostic APK
+name: Build ARNu APK
 on:
   workflow_dispatch:
   push:
     branches: [main]
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -17,12 +18,60 @@ jobs:
       - uses: android-actions/setup-android@v3
         with:
           packages: 'platform-tools platforms;android-35 build-tools;35.0.0'
-      - run: sdkmanager --list_installed
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.9'
-      - run: gradle --no-daemon assembleDebug
-      - uses: actions/upload-artifact@v4
+
+      - name: Build test APK
+        run: gradle --no-daemon assembleDebug
+
+      - name: Upload test APK
+        uses: actions/upload-artifact@v4
         with:
           name: ARNu-0.6-debug
           path: app/build/outputs/apk/debug/app-debug.apk
+
+      - name: Check whether release signing is configured
+        id: signing
+        env:
+          KEYSTORE_B64: ${{ secrets.ARNU_KEYSTORE_BASE64 }}
+          STORE_PASS: ${{ secrets.ARNU_KEYSTORE_PASSWORD }}
+          KEY_PASS: ${{ secrets.ARNU_KEY_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ARNU_KEY_ALIAS }}
+        shell: bash
+        run: |
+          if [[ -n "$KEYSTORE_B64" && -n "$STORE_PASS" && -n "$KEY_PASS" && -n "$KEY_ALIAS" ]]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "Release signing not configured; skipping signed APK."
+          fi
+
+      - name: Restore private signing key
+        if: steps.signing.outputs.ready == 'true'
+        env:
+          KEYSTORE_B64: ${{ secrets.ARNU_KEYSTORE_BASE64 }}
+        shell: bash
+        run: |
+          umask 077
+          printf '%s' "$KEYSTORE_B64" | base64 --decode > "$RUNNER_TEMP/arnu-release.jks"
+          test -s "$RUNNER_TEMP/arnu-release.jks"
+
+      - name: Build signed release APK
+        if: steps.signing.outputs.ready == 'true'
+        env:
+          ARNU_KEYSTORE_PATH: ${{ runner.temp }}/arnu-release.jks
+          ARNU_KEYSTORE_PASSWORD: ${{ secrets.ARNU_KEYSTORE_PASSWORD }}
+          ARNU_KEY_PASSWORD: ${{ secrets.ARNU_KEY_PASSWORD }}
+          ARNU_KEY_ALIAS: ${{ secrets.ARNU_KEY_ALIAS }}
+        run: |
+          gradle --no-daemon assembleRelease
+          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose app/build/outputs/apk/release/app-release.apk
+
+      - name: Upload signed release APK
+        if: steps.signing.outputs.ready == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ARNu-0.6-signed-release
+          path: app/build/outputs/apk/release/app-release.apk
+          if-no-files-found: error
