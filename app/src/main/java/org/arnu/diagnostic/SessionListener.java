@@ -12,6 +12,7 @@ public final class SessionListener extends NotificationListenerService {
  private MediaController controller;
  private MediaController.Callback callback;
  private long paused=-1;
+ private long pauseStarted=-1;
  private boolean connected;
  private final SharedPreferences.OnSharedPreferenceChangeListener prefs=(p,k)->{if("enabled".equals(k)||"autostart".equals(k)||"opened_boot".equals(k)){paused=-1;refresh();}};
  private final MediaSessionManager.OnActiveSessionsChangedListener sessions=list->refresh();
@@ -47,10 +48,14 @@ public final class SessionListener extends NotificationListenerService {
  if(s==null||!enabled()){paused=-1;return;}
  int state=s.getState();
  Log.i("ARNu","State="+state+" position="+s.getPosition()+" actions="+s.getActions());
- if(state==PlaybackState.STATE_PAUSED){paused=s.getPosition();return;}
+ if(state==PlaybackState.STATE_PAUSED){if(paused<0)pauseStarted=SystemClock.elapsedRealtime();paused=s.getPosition();return;}
  if(state==PlaybackState.STATE_BUFFERING||state==PlaybackState.STATE_CONNECTING)return;
  if(state==PlaybackState.STATE_PLAYING&&paused>=0){
  long before=paused;paused=-1;
+ long elapsed=SystemClock.elapsedRealtime()-pauseStarted;pauseStarted=-1;
+ long minimum=1000L*getSharedPreferences("arnu",0).getInt("min_pause",0);
+ if(elapsed<minimum){Log.i("ARNu","Pause too short: "+elapsed+" ms, minimum="+minimum);return;}
+ Log.i("ARNu","Pause duration="+elapsed+" ms");
  if((s.getActions()&PlaybackState.ACTION_SEEK_TO)==0){Log.w("ARNu","Seek unsupported");return;}
  if(s.getPosition()<0||Math.abs(s.getPosition()-before)>3000){Log.w("ARNu","Resume position changed; skipping rewind");return;}
  long target=Math.max(0,before-1000L*getSharedPreferences("arnu",0).getInt("seconds",7));
