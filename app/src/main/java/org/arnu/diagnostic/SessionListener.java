@@ -13,10 +13,10 @@ public final class SessionListener extends NotificationListenerService {
  private MediaController.Callback callback;
  private long paused=-1;
  private boolean connected;
- private final SharedPreferences.OnSharedPreferenceChangeListener prefs=(p,k)->{if("enabled".equals(k)){paused=-1;refresh();}};
+ private final SharedPreferences.OnSharedPreferenceChangeListener prefs=(p,k)->{if("enabled".equals(k)||"autostart".equals(k)||"opened_boot".equals(k)){paused=-1;refresh();}};
  private final MediaSessionManager.OnActiveSessionsChangedListener sessions=list->refresh();
  private final Runnable tick=new Runnable(){public void run(){if(connected){refresh();h.postDelayed(this,2000);}}};
- private boolean enabled(){return getSharedPreferences("arnu",0).getBoolean("enabled",false);}
+ private boolean enabled(){SharedPreferences p=getSharedPreferences("arnu",0);return p.getBoolean("enabled",false)&&(p.getBoolean("autostart",true)||MainActivity.openedThisBoot(this));}
  @Override public void onListenerConnected(){
  super.onListenerConnected(); connected=true;
  getSharedPreferences("arnu",0).registerOnSharedPreferenceChangeListener(prefs);
@@ -53,7 +53,7 @@ public final class SessionListener extends NotificationListenerService {
  long before=paused;paused=-1;
  if((s.getActions()&PlaybackState.ACTION_SEEK_TO)==0){Log.w("ARNu","Seek unsupported");return;}
  if(s.getPosition()<0||Math.abs(s.getPosition()-before)>3000){Log.w("ARNu","Resume position changed; skipping rewind");return;}
- long target=Math.max(0,before-7000);
+ long target=Math.max(0,before-1000L*getSharedPreferences("arnu",0).getInt("seconds",7));
  final MediaController current=controller;
  try{current.getTransportControls().seekTo(target);Log.i("ARNu","Seek requested "+before+" -> "+target);
  h.postDelayed(()->{if(controller==current){PlaybackState now=current.getPlaybackState();Log.i("ARNu","After seek position="+(now==null?-1:now.getPosition()));}},1500);
