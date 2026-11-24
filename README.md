@@ -2,6 +2,8 @@
 
 [![Version](https://img.shields.io/badge/version-0.6-blue)](https://github.com/usertion/ARNu/releases) [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE) [![Downloads](https://img.shields.io/github/downloads/usertion/ARNu/total)](https://github.com/usertion/ARNu/releases)
 
+**[⬇ Descargar ARNu / Download ARNu (APK)](https://github.com/usertion/ARNu/releases/latest/download/ARNu.apk)** · [Última versión / Latest release](https://github.com/usertion/ARNu/releases/latest)
+
 <div align="center">
 
 <img src="ARNu.png" alt="ARNu 0.6 — pantalla principal en Android TV" width="900">
