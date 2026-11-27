@@ -54,6 +54,15 @@ ARNu retrocede automáticamente unos segundos al reanudar un vídeo en **Nuvio**
 - ARNu no garantiza que Android nunca cierre su proceso. La optimización de batería del fabricante puede afectar al funcionamiento.
 - **Versión beta:** probada inicialmente en un Tanix TX5 con Android 14. No se ha validado todavía en todos los dispositivos.
 
+
+### Dispositivos probados
+
+| Dispositivo | Sistema | Resultado |
+|---|---|---|
+| Tanix TX5 | Android 14 | Funcionamiento confirmado |
+| TCL C765 | Google TV 14 | Funcionamiento confirmado (MulderX) |
+| Xiaomi Mi Box 3 Gen | Google TV 14 | Funcionamiento confirmado (MulderX) |
+
 ### Android 13/14: «Ajuste restringido» y permiso de acceso multimedia
 
 En algunos dispositivos con Android 13 o 14, las aplicaciones instaladas mediante APK pueden mostrar **«Ajuste restringido»** al intentar habilitar el acceso a notificaciones. El permiso es necesario para que ARNu pueda detectar la pausa y controlar la sesión multimedia de Nuvio. No es lo mismo que el interruptor ordinario de **«Notificaciones»** de la ficha de la aplicación: ese controla las notificaciones que ARNu puede mostrar, no el acceso a sesiones multimedia.
@@ -94,6 +103,15 @@ ARNu is an independent Android TV companion app for Nuvio. It rewinds playback w
 **Setup:** install the APK, open ARNu, grant notification listener access under Android settings, enable automatic rewind, configure both times and select **Go to Nuvio**. The permission is used to access active media sessions; ARNu does not process notification text.
 
 **Compatibility:** Android 8.0+; designed for Android TV and Nuvio. Functionality depends on device firmware, media-session support and battery-management behavior. This is beta software.
+
+
+### Tested devices
+
+| Device | OS | Result |
+|---|---|---|
+| Tanix TX5 | Android 14 | Confirmed working |
+| TCL C765 | Google TV 14 | Confirmed working (MulderX) |
+| Xiaomi Mi Box 3 Gen | Google TV 14 | Confirmed working (MulderX) |
 
 ### Android 13/14: restricted settings
 
