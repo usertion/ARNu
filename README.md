@@ -22,9 +22,9 @@
 
 **[Descargas beta / Beta downloads](https://github.com/usertion/ARNu/releases)** · [Experimental branch / Rama experimental](https://github.com/usertion/ARNu/tree/experimental-0.7)
 
-**Español:** La beta amplía ARNu a Nuvio, Nuvio Lite, Stremio y Nuvio Arc. Detecta los reproductores compatibles instalados, permite activar el retroceso por aplicación y abrir cada reproductor. La interfaz tiene dos pestañas: Configuración y Reproductores. «Detener ARNu» detiene el servicio sin cambiar las preferencias; al abrir ARNu se recupera la configuración. Nuvio Lite y Stremio han sido probados en Fire TV Stick 4K Max (Fire OS 7); También se ha confirmado el funcionamiento con Nuvio Arc.
+**Español:** La beta amplía ARNu a Nuvio, Nuvio Lite, Stremio y Nuvio Arc. Detecta los reproductores compatibles instalados, permite activar el retroceso por aplicación y abrir cada reproductor. La interfaz tiene dos pestañas: Configuración y Reproductores. «Detener ARNu» detiene el servicio sin cambiar las preferencias; al abrir ARNu se recupera la configuración. Nuvio Lite, Stremio y Nuvio Arc han sido probados con éxito en Amazon Fire TV Stick 4K Max (Fire OS 7).
 
-**English:** The beta adds multi-player support for Nuvio, Nuvio Lite, Stremio and Nuvio Arc, automatic detection of installed supported players, individual switches and launch buttons, and Settings and Players tabs. Stop ARNu disconnects the service without changing preferences. Nuvio Lite and Stremio have been tested on Fire TV Stick 4K Max (Fire OS 7); Nuvio Arc has also been tested and confirmed working.
+**English:** The beta adds multi-player support for Nuvio, Nuvio Lite, Stremio and Nuvio Arc, automatic detection of installed supported players, individual switches and launch buttons, and Settings and Players tabs. Stop ARNu disconnects the service without changing preferences. Nuvio Lite, Stremio and Nuvio Arc have been successfully tested on Amazon Fire TV Stick 4K Max (Fire OS 7).
 
 <div align="center">
 <img src="Screenshot_20261128184510.png" alt="ARNu 0.7.2 beta — Android TV / Fire TV" width="900">
@@ -83,7 +83,7 @@ ARNu retrocede automáticamente unos segundos al reanudar un vídeo en **Nuvio**
 | Tanix TX5 | Android 14 | Funcionamiento confirmado |
 | TCL C765 | Google TV 14 | Funcionamiento confirmado |
 | Xiaomi Mi Box 3 Gen | Google TV 14 | Funcionamiento confirmado |
-| Amazon Fire TV Stick 4K Max (1.ª generación, 2021) | Fire OS 7.7.1.3 (Android 9) | Nuvio Lite y Stremio: retroceso confirmado en rama 0.7 beta; permiso mediante ADB; interfaz 0.7.2 probada |
+| Amazon Fire TV Stick 4K Max (1.ª generación, 2021) | Fire OS 7.7.1.3 (Android 9) | Nuvio Lite, Stremio y Nuvio Arc: retroceso confirmado en rama 0.7 beta; permiso mediante ADB; interfaz 0.7.2 probada |
 | Fire TV Stick 4K Plus | Fire OS | Instalación y permisos sin ADB confirmados; retroceso con Nuvio Lite pendiente |
 
 ### Android 13/14: «Ajuste restringido» y permiso de acceso multimedia
@@ -135,7 +135,7 @@ ARNu is an independent Android TV companion app for Nuvio. It rewinds playback w
 | Tanix TX5 | Android 14 | Confirmed working |
 | TCL C765 | Google TV 14 | Confirmed working |
 | Xiaomi Mi Box 3 Gen | Google TV 14 | Confirmed working |
-| Amazon Fire TV Stick 4K Max (1st generation, 2021) | Fire OS 7.7.1.3 (Android 9) | Nuvio Lite and Stremio: rewind confirmed on 0.7 beta branch; permission via ADB; 0.7.2 UI tested |
+| Amazon Fire TV Stick 4K Max (1st generation, 2021) | Fire OS 7.7.1.3 (Android 9) | Nuvio Lite, Stremio and Nuvio Arc: rewind confirmed on 0.7 beta branch; permission via ADB; 0.7.2 UI tested |
 | Fire TV Stick 4K Plus | Fire OS | Installation and permissions confirmed without ADB; rewind with Nuvio Lite not yet verified |
 
 ### Android 13/14: restricted settings
