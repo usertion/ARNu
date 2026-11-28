@@ -26,6 +26,11 @@
 
 **English:** The beta adds experimental multi-player support for Nuvio, Nuvio Lite, Stremio and Nuvio Arc, automatic detection of installed supported players, individual switches and launch buttons, and Settings and Players tabs. Stop ARNu disconnects the service without changing preferences. Nuvio Lite and Stremio have been tested on Fire TV Stick 4K Max (Fire OS 7); Nuvio Arc remains unverified.
 
+<div align="center">
+<img src="Screenshot_20261128184510.png" alt="ARNu 0.7.2 beta — Android TV / Fire TV" width="900">
+<img src="Screenshot_20261128184521.png" alt="ARNu 0.7.2 beta — Settings and Players / Configuración y Reproductores" width="900">
+</div>
+
 **Fire OS 7:** Si no se abre el ajuste de acceso multimedia / If media access settings cannot be opened, use ADB on your own device:
 
 ```sh
@@ -78,6 +83,7 @@ ARNu retrocede automáticamente unos segundos al reanudar un vídeo en **Nuvio**
 | Tanix TX5 | Android 14 | Funcionamiento confirmado |
 | TCL C765 | Google TV 14 | Funcionamiento confirmado |
 | Xiaomi Mi Box 3 Gen | Google TV 14 | Funcionamiento confirmado |
+| Amazon Fire TV Stick 4K Max (1.ª generación, 2021) | Fire OS 7.7.1.3 (Android 9) | Nuvio Lite y Stremio: retroceso confirmado en rama 0.7 beta; permiso mediante ADB; interfaz 0.7.2 probada |
 | Fire TV Stick 4K Plus | Fire OS | Instalación y permisos sin ADB confirmados; retroceso con Nuvio Lite pendiente |
 
 ### Android 13/14: «Ajuste restringido» y permiso de acceso multimedia
@@ -129,6 +135,7 @@ ARNu is an independent Android TV companion app for Nuvio. It rewinds playback w
 | Tanix TX5 | Android 14 | Confirmed working |
 | TCL C765 | Google TV 14 | Confirmed working |
 | Xiaomi Mi Box 3 Gen | Google TV 14 | Confirmed working |
+| Amazon Fire TV Stick 4K Max (1st generation, 2021) | Fire OS 7.7.1.3 (Android 9) | Nuvio Lite and Stremio: rewind confirmed on 0.7 beta branch; permission via ADB; 0.7.2 UI tested |
 | Fire TV Stick 4K Plus | Fire OS | Installation and permissions confirmed without ADB; rewind with Nuvio Lite not yet verified |
 
 ### Android 13/14: restricted settings
