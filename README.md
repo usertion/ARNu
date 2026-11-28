@@ -14,9 +14,25 @@
 
 **ARNu** is a lightweight, independent companion app for **Nuvio on Android TV**. It automatically rewinds playback when you resume after a pause, so you don't miss the dialogue or action.
 
-**Current version:** 0.6 — beta / testing.
+**Stable channel:** 0.6 · **Experimental beta:** 0.7.2.
 
 [Español](#español) · [English](#english) · [Build](#build-from-source) · [License](LICENSE)
+
+## Multi-player beta — 0.7.2
+
+**[Descargas beta / Beta downloads](https://github.com/usertion/ARNu/releases)** · [Experimental branch / Rama experimental](https://github.com/usertion/ARNu/tree/experimental-0.7)
+
+**Español:** La beta amplía ARNu a Nuvio, Nuvio Lite, Stremio y Nuvio Arc (compatibilidad experimental). Detecta los reproductores compatibles instalados, permite activar el retroceso por aplicación y abrir cada reproductor. La interfaz tiene dos pestañas: Configuración y Reproductores. «Detener ARNu» detiene el servicio sin cambiar las preferencias; al abrir ARNu se recupera la configuración. Nuvio Lite y Stremio han sido probados en Fire TV Stick 4K Max (Fire OS 7); Nuvio Arc está pendiente de validación.
+
+**English:** The beta adds experimental multi-player support for Nuvio, Nuvio Lite, Stremio and Nuvio Arc, automatic detection of installed supported players, individual switches and launch buttons, and Settings and Players tabs. Stop ARNu disconnects the service without changing preferences. Nuvio Lite and Stremio have been tested on Fire TV Stick 4K Max (Fire OS 7); Nuvio Arc remains unverified.
+
+**Fire OS 7:** Si no se abre el ajuste de acceso multimedia / If media access settings cannot be opened, use ADB on your own device:
+
+```sh
+adb shell cmd notification allow_listener org.arnu.diagnostic/org.arnu.diagnostic.SessionListener
+```
+
+Omitir `adb shell` si ya estás en la consola / Omit `adb shell` if already in the shell.
 
 ## Español
 
