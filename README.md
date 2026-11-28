@@ -22,9 +22,9 @@
 
 **[Descargas beta / Beta downloads](https://github.com/usertion/ARNu/releases)** · [Experimental branch / Rama experimental](https://github.com/usertion/ARNu/tree/experimental-0.7)
 
-**Español:** La beta amplía ARNu a Nuvio, Nuvio Lite, Stremio y Nuvio Arc (compatibilidad experimental). Detecta los reproductores compatibles instalados, permite activar el retroceso por aplicación y abrir cada reproductor. La interfaz tiene dos pestañas: Configuración y Reproductores. «Detener ARNu» detiene el servicio sin cambiar las preferencias; al abrir ARNu se recupera la configuración. Nuvio Lite y Stremio han sido probados en Fire TV Stick 4K Max (Fire OS 7); Nuvio Arc está pendiente de validación.
+**Español:** La beta amplía ARNu a Nuvio, Nuvio Lite y Stremio. Detecta los reproductores compatibles instalados, permite activar el retroceso por aplicación y abrir cada reproductor. La interfaz tiene dos pestañas: Configuración y Reproductores. «Detener ARNu» detiene el servicio sin cambiar las preferencias; al abrir ARNu se recupera la configuración. Nuvio Lite y Stremio han sido probados en Fire TV Stick 4K Max (Fire OS 7); Nuvio Arc no se ha probado y no se anuncia como compatible.
 
-**English:** The beta adds experimental multi-player support for Nuvio, Nuvio Lite, Stremio and Nuvio Arc, automatic detection of installed supported players, individual switches and launch buttons, and Settings and Players tabs. Stop ARNu disconnects the service without changing preferences. Nuvio Lite and Stremio have been tested on Fire TV Stick 4K Max (Fire OS 7); Nuvio Arc remains unverified.
+**English:** The beta adds multi-player support for Nuvio, Nuvio Lite and Stremio, automatic detection of installed supported players, individual switches and launch buttons, and Settings and Players tabs. Stop ARNu disconnects the service without changing preferences. Nuvio Lite and Stremio have been tested on Fire TV Stick 4K Max (Fire OS 7); Nuvio Arc has not been tested and is not advertised as supported.
 
 <div align="center">
 <img src="Screenshot_20261128184510.png" alt="ARNu 0.7.2 beta — Android TV / Fire TV" width="900">
