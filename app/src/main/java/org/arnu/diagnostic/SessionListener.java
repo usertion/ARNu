@@ -13,15 +13,16 @@ public final class SessionListener extends NotificationListenerService {
  private boolean connected;
  private final Map<MediaSession.Token,Tracked> tracked=new HashMap<>();
  private SharedPreferences p(){return getSharedPreferences("arnu",0);}
- private boolean enabled(){return p().getBoolean("enabled",false)&&(p().getBoolean("autostart",true)||MainActivity.openedThisBoot(this));}
+ private boolean enabled(){return !p().getBoolean("runtime_stopped",false)&&p().getBoolean("enabled",false)&&(p().getBoolean("autostart",true)||MainActivity.openedThisBoot(this));}
  private final MediaSessionManager.OnActiveSessionsChangedListener sessions=list->refresh();
  private final Runnable tick=new Runnable(){public void run(){if(connected&&enabled()){refresh();h.postDelayed(this,2000);}}};
  private final SharedPreferences.OnSharedPreferenceChangeListener prefs=(p,k)->{
- if("enabled".equals(k)||"autostart".equals(k)||"opened_boot".equals(k)||k.startsWith("player.")){
+ if("runtime_stopped".equals(k)&&p.getBoolean(k,false)){suspend();return;}
+ if("enabled".equals(k)||"runtime_stopped".equals(k)||"autostart".equals(k)||"opened_boot".equals(k)||k.startsWith("player.")){
  refresh();h.removeCallbacks(tick);if(connected&&enabled())h.postDelayed(tick,2000);
  }};
  @Override public void onListenerConnected(){
- super.onListenerConnected();connected=true;p().registerOnSharedPreferenceChangeListener(prefs);
+ super.onListenerConnected();if(p().getBoolean("runtime_stopped",false)){requestUnbind();return;}connected=true;p().registerOnSharedPreferenceChangeListener(prefs);
  manager=(MediaSessionManager)getSystemService(MEDIA_SESSION_SERVICE);
  try{manager.addOnActiveSessionsChangedListener(sessions,new ComponentName(this,SessionListener.class),h);}catch(Exception e){Log.e("ARNu","Listener registration",e);}
  h.removeCallbacks(tick);h.post(tick);
@@ -77,6 +78,7 @@ public final class SessionListener extends NotificationListenerService {
  }
  private void detach(MediaSession.Token token){Tracked tr=tracked.remove(token);if(tr!=null){h.removeCallbacks(tr.rearm);tr.c.unregisterCallback(tr);Log.i("ARNu","Session detached "+tr.pkg);}}
  private void clear(){for(MediaSession.Token token:new ArrayList<>(tracked.keySet()))detach(token);}
+ private void suspend(){cleanup();Log.i("ARNu","Stopped by user; preferences retained");requestUnbind();}
  private void cleanup(){connected=false;h.removeCallbacksAndMessages(null);clear();p().unregisterOnSharedPreferenceChangeListener(prefs);if(manager!=null)manager.removeOnActiveSessionsChangedListener(sessions);}
  @Override public void onListenerDisconnected(){cleanup();super.onListenerDisconnected();}
  @Override public void onDestroy(){cleanup();super.onDestroy();}
