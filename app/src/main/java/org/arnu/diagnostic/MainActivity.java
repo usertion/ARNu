@@ -44,22 +44,36 @@ public final class MainActivity extends Activity {
  @Override public void onCreate(Bundle b){
  super.onCreate(b);p=getSharedPreferences("arnu",0);p.edit().putInt("opened_boot",Settings.Global.getInt(getContentResolver(),"boot_count",-1)).apply();
  ScrollView scroll=new ScrollView(this);scroll.setFillViewport(true);scroll.setBackgroundColor(BG);LinearLayout root=vertical();root.setPadding(dp(28),dp(18),dp(28),dp(18));scroll.addView(root);setContentView(scroll);
- LinearLayout header=horizontal();ImageView logo=new ImageView(this);logo.setImageResource(R.drawable.arnu_icon);header.addView(logo,new LinearLayout.LayoutParams(dp(64),dp(64)));LinearLayout branding=vertical();branding.setPadding(dp(12),0,0,0);branding.addView(label("ARNu",32,INK,true));branding.addView(label("Auto Rewind Nuvio",15,MUTED,false));fill(header,branding);header.addView(label("v0.6",13,MUTED,false));root.addView(header);gap(root,6);status=label("",15,ACCENT,true);root.addView(status);gap(root,14);
+ LinearLayout header=horizontal();ImageView logo=new ImageView(this);logo.setImageResource(R.drawable.arnu_icon);header.addView(logo,new LinearLayout.LayoutParams(dp(64),dp(64)));LinearLayout branding=vertical();branding.setPadding(dp(12),0,0,0);branding.addView(label("ARNu",32,INK,true));branding.addView(label("Auto Rewind · Multi-player",15,MUTED,false));fill(header,branding);header.addView(label("v0.7 beta",13,MUTED,false));root.addView(header);gap(root,6);status=label("",15,ACCENT,true);root.addView(status);gap(root,14);
  boolean wide=getResources().getConfiguration().screenWidthDp>=650;LinearLayout columns=wide?horizontal():vertical();columns.setGravity(Gravity.TOP);root.addView(columns);
  LinearLayout left=vertical(),right=vertical();if(wide){fill(columns,left);Space sp=new Space(this);columns.addView(sp,new LinearLayout.LayoutParams(dp(20),1));fill(columns,right);}else{columns.addView(left);columns.addView(right);}
  left.addView(label(t("GENERAL","GENERAL"),13,MUTED,true));gap(left,8);
  toggle(left,t("Automatic rewind","Retroceso automático"),t("Resume with context","Retoma la historia sin perderte nada"),"enabled",false);
  toggle(left,t("Start with Android TV","Iniciar con Android TV"),t("Ready after every restart","Listo después de cada reinicio"),"autostart",true);
  Button grant=button(t("Media access settings","Configurar acceso multimedia"));grant.setOnClickListener(v->{try{startActivity(new Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS));}catch(Exception e){Toast.makeText(this,e.toString(),Toast.LENGTH_LONG).show();}});left.addView(grant);gap(left,12);
+ left.addView(label(t("DETECTED PLAYERS","REPRODUCTORES DETECTADOS"),13,MUTED,true));gap(left,8);
+ int count=0;
+ for(int j=0;j<Players.PACKAGES.length;j++){
+  final String pkg=Players.PACKAGES[j], name=Players.NAMES[j];
+  Intent launch=getPackageManager().getLeanbackLaunchIntentForPackage(pkg);
+  if(launch==null)launch=getPackageManager().getLaunchIntentForPackage(pkg);
+  if(launch==null)continue;
+  final Intent target=launch;count++;
+  LinearLayout row=horizontal();
+  Switch sw=new Switch(this);sw.setText(name);sw.setTextColor(INK);sw.setTextSize(17);sw.setChecked(Players.enabled(p,pkg));sw.setFocusable(true);sw.setBackground(focus());sw.setPadding(dp(10),dp(8),dp(10),dp(8));
+  sw.setOnCheckedChangeListener((v,on)->p.edit().putBoolean("player."+pkg,on).apply());
+  fill(row,sw);Button open=button("▶");open.setContentDescription(t("Open ","Abrir ")+name);open.setTextColor(ACCENT);
+  open.setOnClickListener(v->{try{startActivity(target);finishAndRemoveTask();}catch(Exception e){Toast.makeText(this,e.toString(),Toast.LENGTH_SHORT).show();}});
+  row.addView(open,new LinearLayout.LayoutParams(dp(56),dp(48)));left.addView(row);gap(left,6);
+ }
+ if(count==0)left.addView(label(t("No supported players installed","No hay reproductores compatibles instalados"),14,MUTED,false));
  right.addView(label(t("PLAYBACK","REPRODUCCIÓN"),13,MUTED,true));gap(right,8);
  counter(right,t("Rewind time","Tiempo de retroceso"),t("Seconds to go back","Segundos que se rebobinan"),"seconds",1,30,7);
  counter(right,t("Minimum pause","Pausa mínima"),t("Ignore shorter interruptions","Ignora las interrupciones breves"),"min_pause",0,120,0);
  summary=label("",14,MUTED,false);root.addView(summary);gap(root,14);
  LinearLayout actions=wide?horizontal():vertical();root.addView(actions);
- Button nuvio=button(t("▶  Go to Nuvio","▶  Ir a Nuvio"));nuvio.setTextColor(ACCENT);
  Button home=button(t("Exit to home","Salir al inicio")),stop=button(t("Stop ARNu","Detener ARNu"));stop.setTextColor(0xffffb3b3);
- if(wide){fill(actions,nuvio);Space a=new Space(this);actions.addView(a,new LinearLayout.LayoutParams(dp(8),1));fill(actions,home);Space z=new Space(this);actions.addView(z,new LinearLayout.LayoutParams(dp(8),1));fill(actions,stop);}else{actions.addView(nuvio);gap(actions,6);actions.addView(home);gap(actions,6);actions.addView(stop);}
- nuvio.setOnClickListener(v->{Intent i=getPackageManager().getLeanbackLaunchIntentForPackage("com.nuvio.tv");if(i==null)i=getPackageManager().getLaunchIntentForPackage("com.nuvio.tv");if(i==null){Toast.makeText(this,t("Nuvio unavailable","Nuvio no disponible"),Toast.LENGTH_SHORT).show();return;}try{startActivity(i);finishAndRemoveTask();}catch(Exception e){Toast.makeText(this,e.toString(),Toast.LENGTH_SHORT).show();}});
+ if(wide){fill(actions,home);Space z=new Space(this);actions.addView(z,new LinearLayout.LayoutParams(dp(8),1));fill(actions,stop);}else{actions.addView(home);gap(actions,6);actions.addView(stop);}
  home.setOnClickListener(v->goHome());
  stop.setOnClickListener(v->new android.app.AlertDialog.Builder(this).setTitle(t("Stop ARNu?","¿Detener ARNu?")).setMessage(t("Automatic rewind will stay disabled until you enable it again.","El retroceso quedará desactivado hasta que vuelvas a activarlo.")).setNegativeButton(t("Cancel","Cancelar"),null).setPositiveButton(t("Stop","Detener"),(d,w)->{p.edit().putBoolean("enabled",false).apply();goHome();}).show());
  refresh();
