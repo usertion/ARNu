@@ -1,72 +1,73 @@
 package org.arnu.diagnostic;
 import android.content.*;
+import android.media.MediaMetadata;
 import android.media.session.*;
 import android.os.*;
 import android.service.notification.NotificationListenerService;
 import android.util.Log;
-import java.util.List;
+import java.util.*;
 
 public final class SessionListener extends NotificationListenerService {
  private final Handler h=new Handler(Looper.getMainLooper());
  private MediaSessionManager manager;
- private MediaController controller;
- private MediaController.Callback callback;
- private long paused=-1;
- private long pauseStarted=-1;
  private boolean connected;
+ private final Map<MediaSession.Token,Tracked> tracked=new HashMap<>();
+ private SharedPreferences p(){return getSharedPreferences("arnu",0);}
+ private boolean enabled(){return p().getBoolean("enabled",false)&&(p().getBoolean("autostart",true)||MainActivity.openedThisBoot(this));}
  private final MediaSessionManager.OnActiveSessionsChangedListener sessions=list->refresh();
  private final Runnable tick=new Runnable(){public void run(){if(connected&&enabled()){refresh();h.postDelayed(this,2000);}}};
- private final SharedPreferences.OnSharedPreferenceChangeListener prefs=(p,k)->{if("enabled".equals(k)||"autostart".equals(k)||"opened_boot".equals(k)){paused=-1;refresh();h.removeCallbacks(tick);if(connected&&enabled())h.postDelayed(tick,2000);}};
- private boolean enabled(){SharedPreferences p=getSharedPreferences("arnu",0);return p.getBoolean("enabled",false)&&(p.getBoolean("autostart",true)||MainActivity.openedThisBoot(this));}
+ private final SharedPreferences.OnSharedPreferenceChangeListener prefs=(p,k)->{
+ if("enabled".equals(k)||"autostart".equals(k)||"opened_boot".equals(k)||k.startsWith("player.")){
+ refresh();h.removeCallbacks(tick);if(connected&&enabled())h.postDelayed(tick,2000);
+ }};
  @Override public void onListenerConnected(){
- super.onListenerConnected(); connected=true;
- getSharedPreferences("arnu",0).registerOnSharedPreferenceChangeListener(prefs);
+ super.onListenerConnected();connected=true;p().registerOnSharedPreferenceChangeListener(prefs);
  manager=(MediaSessionManager)getSystemService(MEDIA_SESSION_SERVICE);
  try{manager.addOnActiveSessionsChangedListener(sessions,new ComponentName(this,SessionListener.class),h);}catch(Exception e){Log.e("ARNu","Listener registration",e);}
- h.removeCallbacks(tick);h.post(tick);Log.i("ARNu","Listener connected");
+ h.removeCallbacks(tick);h.post(tick);
  }
  private void refresh(){
- if(!connected||!enabled()){detach();return;}
+ if(!connected||!enabled()){clear();return;}
  try{
- List<MediaController> list=manager.getActiveSessions(new ComponentName(this,SessionListener.class));
- MediaController found=null;
- for(MediaController c:list)if("com.nuvio.tv".equals(c.getPackageName())){found=c;break;}
- if(found==null){detach();return;}
- if(controller!=null&&controller.getSessionToken().equals(found.getSessionToken()))return;
- detach();controller=found;
- final MediaController current=found;
- callback=new MediaController.Callback(){
- @Override public void onPlaybackStateChanged(PlaybackState s){if(controller==current)handle(s);}
- @Override public void onSessionDestroyed(){if(controller==current)detach();}
- @Override public void onMetadataChanged(android.media.MediaMetadata m){paused=-1;}
- };
- controller.registerCallback(callback,h);
- Log.i("ARNu","Nuvio session detected");handle(controller.getPlaybackState());
- }catch(Exception e){Log.e("ARNu","Session scan failed",e);detach();}
+ Set<MediaSession.Token> seen=new HashSet<>();
+ for(MediaController c:manager.getActiveSessions(new ComponentName(this,SessionListener.class))){
+ if(!Players.enabled(p(),c.getPackageName()))continue;
+ MediaSession.Token token=c.getSessionToken();seen.add(token);
+ if(!tracked.containsKey(token)){Tracked tr=new Tracked(c);tracked.put(token,tr);try{c.registerCallback(tr,h);}catch(Exception e){tracked.remove(token);throw e;}Log.i("ARNu","Session detected "+c.getPackageName());}
  }
- private void handle(PlaybackState s){
- if(s==null||!enabled()){paused=-1;return;}
- int state=s.getState();
- Log.i("ARNu","State="+state+" position="+s.getPosition()+" actions="+s.getActions());
- if(state==PlaybackState.STATE_PAUSED){if(paused<0)pauseStarted=SystemClock.elapsedRealtime();paused=s.getPosition();return;}
+ for(MediaSession.Token token:new ArrayList<>(tracked.keySet()))if(!seen.contains(token))detach(token);
+ }catch(Exception e){Log.e("ARNu","Session scan failed",e);clear();}
+ }
+ private final class Tracked extends MediaController.Callback {
+ final MediaController c;final MediaSession.Token token;final String pkg;
+ long paused=-1,started=-1;boolean played;
+ Tracked(MediaController controller){c=controller;token=c.getSessionToken();pkg=c.getPackageName();PlaybackState s=c.getPlaybackState();played=s!=null&&s.getState()==PlaybackState.STATE_PLAYING;}
+ boolean valid(){return tracked.get(token)==this&&enabled()&&Players.enabled(p(),pkg);}
+ void reset(){paused=-1;started=-1;}
+ @Override public void onMetadataChanged(MediaMetadata m){reset();}
+ @Override public void onSessionDestroyed(){detach(token);}
+ @Override public void onPlaybackStateChanged(PlaybackState s){
+ if(!valid()||s==null){reset();played=false;return;}
+ int state=s.getState();long pos=s.getPosition();
+ Log.i("ARNu",pkg+" state="+state+" position="+pos+" actions="+s.getActions());
+ if(state==PlaybackState.STATE_PAUSED){
+ if(played&&pos>=0){if(paused<0)started=SystemClock.elapsedRealtime();paused=pos;}return;
+ }
  if(state==PlaybackState.STATE_BUFFERING||state==PlaybackState.STATE_CONNECTING)return;
- if(state==PlaybackState.STATE_PLAYING&&paused>=0){
- long before=paused;paused=-1;
- long elapsed=SystemClock.elapsedRealtime()-pauseStarted;pauseStarted=-1;
- long minimum=1000L*getSharedPreferences("arnu",0).getInt("min_pause",0);
- if(elapsed<minimum){Log.i("ARNu","Pause too short: "+elapsed+" ms, minimum="+minimum);return;}
- Log.i("ARNu","Pause duration="+elapsed+" ms");
- if((s.getActions()&PlaybackState.ACTION_SEEK_TO)==0){Log.w("ARNu","Seek unsupported");return;}
- if(s.getPosition()<0||Math.abs(s.getPosition()-before)>3000){Log.w("ARNu","Resume position changed; skipping rewind");return;}
- long target=Math.max(0,before-1000L*getSharedPreferences("arnu",0).getInt("seconds",7));
- final MediaController current=controller;
- try{current.getTransportControls().seekTo(target);Log.i("ARNu","Seek requested "+before+" -> "+target);
- h.postDelayed(()->{if(controller==current){PlaybackState now=current.getPlaybackState();Log.i("ARNu","After seek position="+(now==null?-1:now.getPosition()));}},1500);
- }catch(Exception e){Log.e("ARNu","Seek failed",e);}
- }else if(state!=PlaybackState.STATE_PLAYING){paused=-1;}
+ if(state!=PlaybackState.STATE_PLAYING){reset();played=false;return;}
+ played=true;if(paused<0)return;
+ long before=paused,elapsed=SystemClock.elapsedRealtime()-started;reset();
+ if(elapsed<1000L*p().getInt("min_pause",0))return;
+ if((s.getActions()&PlaybackState.ACTION_SEEK_TO)==0||pos<0||Math.abs(pos-before)>3000){Log.w("ARNu",pkg+" seek unsupported or position changed");return;}
+ long target=Math.max(0,before-1000L*p().getInt("seconds",7));
+ try{c.getTransportControls().seekTo(target);Log.i("ARNu",pkg+" seek requested "+before+" -> "+target);
+ h.postDelayed(()->{if(valid()){PlaybackState now=c.getPlaybackState();Log.i("ARNu",pkg+" after seek position="+(now==null?-1:now.getPosition()));}},1500);
+ }catch(Exception e){Log.e("ARNu",pkg+" seek failed",e);}
  }
- private void detach(){if(controller!=null){controller.unregisterCallback(callback);Log.i("ARNu","Nuvio session detached");}controller=null;callback=null;paused=-1;}
- private void cleanup(){connected=false;h.removeCallbacksAndMessages(null);detach();getSharedPreferences("arnu",0).unregisterOnSharedPreferenceChangeListener(prefs);if(manager!=null)manager.removeOnActiveSessionsChangedListener(sessions);}
+ }
+ private void detach(MediaSession.Token token){Tracked tr=tracked.remove(token);if(tr!=null){tr.c.unregisterCallback(tr);Log.i("ARNu","Session detached "+tr.pkg);}}
+ private void clear(){for(MediaSession.Token token:new ArrayList<>(tracked.keySet()))detach(token);}
+ private void cleanup(){connected=false;h.removeCallbacksAndMessages(null);clear();p().unregisterOnSharedPreferenceChangeListener(prefs);if(manager!=null)manager.removeOnActiveSessionsChangedListener(sessions);}
  @Override public void onListenerDisconnected(){cleanup();super.onListenerDisconnected();}
  @Override public void onDestroy(){cleanup();super.onDestroy();}
 }
