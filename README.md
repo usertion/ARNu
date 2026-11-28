@@ -62,6 +62,7 @@ ARNu retrocede automáticamente unos segundos al reanudar un vídeo en **Nuvio**
 | Tanix TX5 | Android 14 | Funcionamiento confirmado |
 | TCL C765 | Google TV 14 | Funcionamiento confirmado |
 | Xiaomi Mi Box 3 Gen | Google TV 14 | Funcionamiento confirmado |
+| Fire TV Stick 4K Plus | Fire OS | Instalación y permisos sin ADB confirmados; retroceso con Nuvio Lite pendiente |
 
 ### Android 13/14: «Ajuste restringido» y permiso de acceso multimedia
 
@@ -112,6 +113,7 @@ ARNu is an independent Android TV companion app for Nuvio. It rewinds playback w
 | Tanix TX5 | Android 14 | Confirmed working |
 | TCL C765 | Google TV 14 | Confirmed working |
 | Xiaomi Mi Box 3 Gen | Google TV 14 | Confirmed working |
+| Fire TV Stick 4K Plus | Fire OS | Installation and permissions confirmed without ADB; rewind with Nuvio Lite not yet verified |
 
 ### Android 13/14: restricted settings
 
